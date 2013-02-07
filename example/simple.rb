@@ -1,4 +1,4 @@
-require_relative '../lib/serveable/serveable'
+require_relative '../lib/serveable'
 require 'rack'
 
 class Page
