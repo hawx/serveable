@@ -14,8 +14,6 @@ Gem::Specification.new do |s|
     'server -> site -> page' model on top of rack.
   DESC
 
-  s.add_dependency 'rack', '~> 1.5.1' 
-
   s.files        = %w(README.md Rakefile LICENCE)
   s.files       += Dir["{lib,spec}/**/*"] & `git ls-files`.split("\n")
   s.test_files   = Dir["{spec}/**/*"] & `git ls-files`.split("\n")
