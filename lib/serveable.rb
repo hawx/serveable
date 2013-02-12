@@ -1,63 +1,51 @@
-# Serveable makes creating a simple rack-runnable site easy. All you have to do
-# is stick to the script. First it is expected that your have a site object,
-# collecting all the files. This could be written just for this purpose instead
-# of exposing methods on a previous object if desired. Secondly another set of
-# objects representing pages.
-#
-# The site object needs to extend +Serveable::Site+ (or the class needs to
-# include it), and each page object needs to extend +Serveable::Page+ (or again,
-# the page's class needs to include it). You can then do some basic rack setup
-# and run the site!
 module Serveable
 
-  # The Site module expects the object extending/class including it to have an
-  # instance method called #pages. This method should return a list of objects
-  # which have extended +Serveable::Page+.
+  # Include {Serveable::Site} into an object that responds to #each, which
+  # returns items that expose the same interface (or include) {Item}, to allow
+  # it to be run with Rack.
   module Site
 
     # @return [Array] Returns the payload for the given environment passed.
     def call(env)
-      page = pages.find {|page|
-        paths_equal?(page.url, env['REQUEST_PATH'])
-      } || MissingFile
+      paths_equal = lambda do |a,b|
+        short = a.sub(/index\.html\Z/, '')
+        return a == b || short == b || short[0..-2] == b
+      end
 
-      page.serve
-    end
+      found = Missing
+      each do |item|
+        if paths_equal.call(item.url, env['REQUEST_PATH'])
+          found = item
+        end
+      end
 
-    private
-
-    def paths_equal?(a, b)
-      short = a.sub(/index\.html\Z/, '')
-
-      a == b || short == b || short[0..-2] == b
+      found.serve
     end
   end
 
-  # The Page module expects the object extending/class including it to respond
-  # to the #url and #content methods.
-  module Page
+  # The Item module expects the object extending/class including it to respond
+  # to the #url and #content methods, it then defines the #serve method which is
+  # used by {Site}.
+  module Item
 
-    # @return [String] The contents of the Page to be served.
-    def content; end
+    # @return [String] The contents of the Item to be served.
+    def contents; end
 
-    # @return [String] Full url (including /index.html) to the page.
+    # @return [String] Full url (including /index.html) to the item.
     def url; end
-
-    # @return [String] Mime type for the page based on the extension of #url.
-    def mime
-      Rack::Mime.mime_type ::File.extname(url)
-    end
 
     # @return [Array] Payload for rack. Contains, in order, the status, the
     #   headers and the body.
     def serve
-      [200, {"Content-Type" => mime}, [content]]
+      mime = Rack::Mime.mime_type ::File.extname(url)
+      [200, {"Content-Type" => mime}, [contents]]
     end
   end
 
-  MissingFile = Object.new
-  def MissingFile.serve
-    [404, {}, ["404 file not found"]]
+  # The sole missing file is served when no matching item is found.
+  Missing = Object.new
+  def Missing.serve
+    [404, {}, ["404 not found"]]
   end
 
 end

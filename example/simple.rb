@@ -2,13 +2,13 @@ require_relative '../lib/serveable'
 require 'rack'
 
 class Page
-  include Serveable::Page
+  include Serveable::Item
 
   def initialize(name)
     @name = name
   end
 
-  def content
+  def contents
     "Hello #@name!"
   end
 
@@ -20,12 +20,12 @@ end
 class Site
   include Serveable::Site
 
-  def pages
+  def each(&block)
     [
       Page.new("Dave"),
       Page.new("John"),
       Page.new("Steve")
-    ]
+    ].each(&block)
   end
 end
 
