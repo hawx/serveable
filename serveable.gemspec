@@ -10,11 +10,11 @@ Gem::Specification.new do |s|
   s.version      = Serveable::VERSION
 
   s.description  = <<-DESC
-    Provides a module that allow you to easily incorporate a simple 
+    Provides a module that allow you to easily incorporate a simple
     'server -> site -> page' model on top of rack.
   DESC
 
-  s.files        = %w(README.md Rakefile LICENCE)
+  s.files        = %w(README.md Rakefile LICENSE)
   s.files       += Dir["{lib,spec}/**/*"] & `git ls-files`.split("\n")
   s.test_files   = Dir["{spec}/**/*"] & `git ls-files`.split("\n")
 end
